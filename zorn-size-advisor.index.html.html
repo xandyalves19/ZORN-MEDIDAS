@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZORN - Consultor de Tamanho</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #root {
+            width: 100%;
+            max-width: 480px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function ZornApp() {
+            const [formData, setFormData] = useState({
+                nome: '',
+                tipo: 'Cueca Boxer',
+                peso: '',
+                quadril: ''
+            });
+            const [resultado, setResultado] = useState(null);
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            const calcularTamanho = (peso, quadril) => {
+                if (quadril <= 70 || peso < 65) return "P";
+                if (quadril <= 85 || peso < 75) return "M";
+                if (quadril <= 100 || peso < 85) return "G";
+                return "GG";
+            };
+
+            const gerarResultado = (e) => {
+                e.preventDefault();
+                
+                const { nome, tipo, peso, quadril } = formData;
+                
+                if (!nome.trim() || !peso || !quadril) {
+                    alert("Por favor, preencha todos os campos.");
+                    return;
+                }
+
+                const pesoNum = parseFloat(peso);
+                const quadrilNum = parseFloat(quadril);
+                const tamanho = calcularTamanho(pesoNum, quadrilNum);
+                const data = new Date().toLocaleDateString('pt-BR');
+
+                setResultado({
+                    nome,
+                    tipo,
+                    tamanho,
+                    peso: pesoNum,
+                    quadril: quadrilNum,
+                    data
+                });
+            };
+
+            const enviarWhatsApp = () => {
+                const mensagem = `👤 *CLIENTE:* ${resultado.nome}\n📦 *PRODUTO:* ${resultado.tipo}\n📏 *TAMANHO:* ${resultado.tamanho}\n⚖️ *DADOS:* ${resultado.peso}kg | ${resultado.quadril}cm\n📅 *DATA:* ${resultado.data}\n\n_Gerado por ZORN Size Advisor_`;
+                const numero = "5532985207177";
+                const link = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+                window.open(link, '_blank');
+            };
+
+            const resetar = () => {
+                setResultado(null);
+                setFormData({
+                    nome: '',
+                    tipo: 'Cueca Boxer',
+                    peso: '',
+                    quadril: ''
+                });
+            };
+
+            return (
+                <div style={{
+                    background: 'white',
+                    borderRadius: '24px',
+                    padding: '40px 32px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                }}>
+                    {/* Header */}
+                    <div style={{
+                        textAlign: 'center',
+                        marginBottom: '32px',
+                        borderBottom: '2px solid #f0f0f0',
+                        paddingBottom: '24px'
+                    }}>
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '700',
+                            color: '#1a1a2e',
+                            marginBottom: '8px',
+                            letterSpacing: '2px'
+                        }}>ZORN</h1>
+                        <p style={{
+                            fontSize: '14px',
+                            color: '#6b7280',
+                            fontWeight: '500'
+                        }}>Assistente de Medidas</p>
+                    </div>
+
+                    {!resultado ? (
+                        <form onSubmit={gerarResultado}>
+                            {/* Nome */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: '#374151',
+                                    marginBottom: '8px'
+                                }}>Nome do Cliente</label>
+                                <input
+                                    type="text"
+                                    name="nome"
+                                    value={formData.nome}
+                                    onChange={handleChange}
+                                    placeholder="Como podemos te chamar?"
+                                    style={{
+                                        width: '100%',
+                                        padding: '14px 16px',
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '12px',
+                                        fontSize: '15px',
+                                        transition: 'all 0.3s',
+                                        outline: 'none'
+                                    }}
+                                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                />
+                            </div>
+
+                            {/* Tipo */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: '#374151',
+                                    marginBottom: '8px'
+                                }}>O que deseja comprar?</label>
+                                <select
+                                    name="tipo"
+                                    value={formData.tipo}
+                                    onChange={handleChange}
+                                    style={{
+                                        width: '100%',
+                                        padding: '14px 16px',
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '12px',
+                                        fontSize: '15px',
+                                        backgroundColor: 'white',
+                                        cursor: 'pointer',
+                                        outline: 'none'
+                                    }}
+                                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                >
+                                    <option value="Cueca Boxer">Cueca Boxer (Dry-Fit)</option>
+                                    <option value="Calcinha Boxer">Calcinha Boxer (Confort)</option>
+                                </select>
+                            </div>
+
+                            {/* Grid de Peso e Quadril */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                gap: '16px',
+                                marginBottom: '32px'
+                            }}>
+                                {/* Peso */}
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        color: '#374151',
+                                        marginBottom: '8px'
+                                    }}>Peso (kg)</label>
+                                    <input
+                                        type="number"
+                                        name="peso"
+                                        value={formData.peso}
+                                        onChange={handleChange}
+                                        placeholder="Ex: 78"
+                                        style={{
+                                            width: '100%',
+                                            padding: '14px 16px',
+                                            border: '2px solid #e5e7eb',
+                                            borderRadius: '12px',
+                                            fontSize: '15px',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+
+                                {/* Quadril */}
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        color: '#374151',
+                                        marginBottom: '8px'
+                                    }}>Quadril (cm)</label>
+                                    <input
+                                        type="number"
+                                        name="quadril"
+                                        value={formData.quadril}
+                                        onChange={handleChange}
+                                        placeholder="Ex: 95"
+                                        style={{
+                                            width: '100%',
+                                            padding: '14px 16px',
+                                            border: '2px solid #e5e7eb',
+                                            borderRadius: '12px',
+                                            fontSize: '15px',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Botão */}
+                            <button
+                                type="submit"
+                                style={{
+                                    width: '100%',
+                                    padding: '16px',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '16px',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+                                }}
+                            >
+                                CALCULAR MEU TAMANHO
+                            </button>
+                        </form>
+                    ) : (
+                        <div style={{
+                            animation: 'slideIn 0.4s ease-out'
+                        }}>
+                            {/* Tamanho em Destaque */}
+                            <div style={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                borderRadius: '16px',
+                                padding: '32px',
+                                textAlign: 'center',
+                                marginBottom: '24px',
+                                color: 'white'
+                            }}>
+                                <div style={{
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    opacity: '0.9',
+                                    marginBottom: '8px',
+                                    letterSpacing: '1px'
+                                }}>SEU TAMANHO IDEAL</div>
+                                <div style={{
+                                    fontSize: '72px',
+                                    fontWeight: '900',
+                                    letterSpacing: '4px',
+                                    lineHeight: '1'
+                                }}>{resultado.tamanho}</div>
+                            </div>
+
+                            {/* Detalhes */}
+                            <div style={{
+                                background: '#f9fafb',
+                                borderRadius: '12px',
+                                padding: '20px',
+                                marginBottom: '24px'
+                            }}>
+                                <div style={{
+                                    fontSize: '12px',
+                                    fontWeight: '700',
+                                    color: '#6b7280',
+                                    marginBottom: '16px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px'
+                                }}>Resumo do Pedido</div>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <InfoRow icon="👤" label="Cliente" value={resultado.nome} />
+                                    <InfoRow icon="📦" label="Produto" value={resultado.tipo} />
+                                    <InfoRow icon="⚖️" label="Peso" value={`${resultado.peso} kg`} />
+                                    <InfoRow icon="📏" label="Quadril" value={`${resultado.quadril} cm`} />
+                                    <InfoRow icon="📅" label="Data" value={resultado.data} />
+                                </div>
+                            </div>
+
+                            {/* Botões */}
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    onClick={enviarWhatsApp}
+                                    style={{
+                                        flex: '2',
+                                        padding: '16px',
+                                        background: '#25D366',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontSize: '15px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.transform = 'translateY(-2px)';
+                                        e.target.style.boxShadow = '0 6px 20px rgba(37, 211, 102, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <span>💬</span> ENVIAR PARA LOJA
+                                </button>
+
+                                <button
+                                    onClick={resetar}
+                                    style={{
+                                        flex: '1',
+                                        padding: '16px',
+                                        background: 'white',
+                                        color: '#6b7280',
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '12px',
+                                        fontSize: '15px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.borderColor = '#667eea';
+                                        e.target.style.color = '#667eea';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.borderColor = '#e5e7eb';
+                                        e.target.style.color = '#6b7280';
+                                    }}
+                                >
+                                    ↺ NOVO
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function InfoRow({ icon, label, value }) {
+            return (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #e5e7eb'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        fontWeight: '500'
+                    }}>
+                        <span>{icon}</span>
+                        <span>{label}</span>
+                    </div>
+                    <div style={{
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: '#1a1a2e'
+                    }}>{value}</div>
+                </div>
+            );
+        }
+
+        // Animação CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        ReactDOM.render(<ZornApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
